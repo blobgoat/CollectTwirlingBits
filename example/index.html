@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>collect-twirling-bits — Example</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+
+    <!-- ═══════════════════════════════════════════
+         DEBUG CONTROL PANEL
+         Buttons call package methods directly.
+         ═══════════════════════════════════════════ -->
+    <div class="debug-panel" id="debug-panel">
+      <span class="debug-label">🛠 Debug Controls</span>
+      <button id="btn-start">Start</button>
+      <button id="btn-stop">Stop</button>
+      <button id="btn-destroy">Destroy</button>
+      <button id="btn-reset">Reset Total</button>
+      <button id="btn-log">Log Total</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         1. HERO TEXT AVOIDANCE TEST
+         Large heading + paragraph — bits should
+         avoid landing on this text.
+         ═══════════════════════════════════════════ -->
+    <section class="section hero" aria-label="Hero Text Avoidance Test">
+      <p class="section-tag">Hero Text Avoidance Test</p>
+      <h1>Twirling Bits ✦</h1>
+      <p class="hero-lead">
+        Hover over the golden stars to collect them. They spawn randomly on
+        the screen and should <strong>avoid overlapping visible text</strong>.
+        Use the debug panel above to start, stop, and reset the experience.
+      </p>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         2. CARD LAYOUT TEST
+         Grid of cards — bits should avoid card
+         text but may land in the gaps.
+         ═══════════════════════════════════════════ -->
+    <section class="section" aria-label="Card Layout Test">
+      <p class="section-tag">Card Layout Test</p>
+      <h2>Cards with Text</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Spawn Rate</h3>
+          <p>One new bit appears every second by default. Adjust <code>spawnEveryMs</code> to change the rate.</p>
+        </div>
+        <div class="card">
+          <h3>Max On Screen</h3>
+          <p>Up to 10 bits can exist at once. Controlled by <code>maxOnScreen</code>.</p>
+        </div>
+        <div class="card">
+          <h3>Star Size</h3>
+          <p>Each bit is 28 px wide. Set via <code>starSize</code> in the options object.</p>
+        </div>
+        <div class="card">
+          <h3>Persistence</h3>
+          <p>Your total is stored in <code>localStorage</code> so it survives page reloads.</p>
+        </div>
+        <div class="card">
+          <h3>Text Avoidance</h3>
+          <p>Bits use a <code>TreeWalker</code> to find text nodes and avoid placing stars on them.</p>
+        </div>
+        <div class="card">
+          <h3>Collection</h3>
+          <p>Hover a bit to collect it. It animates toward the counter at the bottom of the screen.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         3. DENSE PARAGRAPH TEST
+         Wall of wrapped text — bits should almost
+         never land here.
+         ═══════════════════════════════════════════ -->
+    <section class="section dense" aria-label="Dense Paragraph Test">
+      <p class="section-tag">Dense Paragraph Test</p>
+      <h2>Dense Paragraph Content</h2>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+        velit esse cillum dolore eu fugiat nulla pariatur.
+      </p>
+      <p>
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+        officia deserunt mollit anim id est laborum. Curabitur pretium tincidunt
+        lacus. Nulla gravida orci a odio. Nullam varius, turpis molestie
+        pretium blandit, purus est posuere sem, sed commodo magna felis ac
+        neque. Morbi fringilla convallis sapien.
+      </p>
+      <p>
+        Phasellus volutpat, metus eget egestas mollis, lacus lacus blandit
+        dui, id egestas quam mauris ut lacus. Fusce vel dui. Sed in libero ut
+        nibh placerat accumsan. Proin faucibus arcu quis ante. In consectetuer
+        turpis ut velit. Nulla sit amet est. Praesent metus tellus, elementum
+        eu, semper a, adipiscing nec, purus. Cras risus ipsum, faucibus ut,
+        ullamcorper id, varius ac, leo.
+      </p>
+      <p>
+        Suspendisse feugiat. Suspendisse enim turpis, dictum sed, iaculis a,
+        condimentum nec, nisi. Praesent nec nisl a purus blandit viverra.
+        Praesent ac massa at ligula laoreet iaculis. Nulla neque dolor, sagittis
+        eget, iaculis quis, molestie non, velit. Mauris turpis nunc, blandit
+        et, volutpat molestie, porta ut, ligula.
+      </p>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         4. OPEN SPACE SPAWN TEST
+         Large blank area — bits should land here
+         frequently because there is no text to avoid.
+         ═══════════════════════════════════════════ -->
+    <section class="section open-space" aria-label="Open Space Spawn Test">
+      <p class="section-tag open-space-tag">Open Space Spawn Test</p>
+      <p class="open-space-hint">← Stars should appear freely in this area →</p>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         5. SCROLL TEST
+         Enough height to verify bits still spawn
+         correctly while the page is scrolled.
+         ═══════════════════════════════════════════ -->
+    <section class="section" aria-label="Scroll Test">
+      <p class="section-tag">Scroll Test</p>
+      <h2>Scroll Test</h2>
+      <p>
+        Scroll up and down while bits are spawning. Stars are positioned using
+        <code>position: fixed</code> so they follow the viewport, not the page.
+        Text avoidance recalculates based on what is currently <em>visible</em>.
+      </p>
+      <div class="scroll-filler">
+        <p>Keep scrolling…</p>
+        <p>Almost there…</p>
+        <p>You've reached the bottom of the scroll test. 🎉</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         FOOTER
+         ═══════════════════════════════════════════ -->
+    <footer>
+      <p>collect-twirling-bits — local dev example &nbsp;|&nbsp; <code>npm run dev</code> in the <code>example/</code> folder</p>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,8 +1,43 @@
+/**
+ * Represents the options for configuring the StarBits functionality.
+ * @typedef {Object} StarBitsOptions
+ * @property {number} [spawnEveryMs=1500] - The interval in milliseconds at which star bits should spawn.
+ * @property {number} [maxOnScreen=8] - The maximum number of star bits that can be on screen at once.
+ * @property {number} [starSize=28] - The size of each star bit in pixels.
+ */
 type StarBitsOptions = {
     spawnEveryMs?: number;
     maxOnScreen?: number;
     starSize?: number;
     storageKey?: string;
+};
+
+/**
+ * Represents the position of a star bit on the screen.
+ * @typedef {Object} StarPosition
+ * @property {number} x - The x-coordinate of the star bit.
+ * @property {number} y - The y-coordinate of the star bit.
+ */
+type StarPosition = {
+    x: number;
+    y: number;
+};
+
+/**
+ * Represents the API for the StarBits functionality.
+ * @typedef {Object} StarBitsApi
+ * @property {Function} start - Starts the spawning of star bits.
+ * @property {Function} stop - Stops the spawning of star bits.
+ * @property {Function} destroy - Destroys the star bits overlay and counter.
+ * @property {Function} getTotal - Gets the total number of collected star bits.
+ * @property {Function} setTotal - Sets the total number of collected star bits.
+ */
+type StarBitsApi = {
+    start: () => void;
+    stop: () => void;
+    destroy: () => void;
+    getTotal: () => number;
+    setTotal: (value: number) => void;
 };
 
 export function createStarBits(options: StarBitsOptions = {}) {
@@ -13,10 +48,13 @@ export function createStarBits(options: StarBitsOptions = {}) {
 
     let intervalId: number | null = null;
     let total = Number(localStorage.getItem(storageKey) ?? "0");
-    let overlay: HTMLDivElement;
-    let counter: HTMLDivElement;
+    let overlay: HTMLDivElement | undefined;
+    let counter: HTMLDivElement | undefined;
 
-    function setup() {
+    /**
+     * Initialized the overlay and conter elements, works as a reset method
+     */
+    function setup(): void {
         overlay = document.createElement("div");
         overlay.className = "starbits-overlay";
 
@@ -29,10 +67,17 @@ export function createStarBits(options: StarBitsOptions = {}) {
 
         injectStyles();
     }
-
-    function start() {
-        if (!overlay) {
+    /**
+     * starts the spawning at a set interval, if overlay isnt setup yet it will attemt to setup first
+     * 
+     */
+    function start(): void {
+        if (!overlay || overlay === undefined) {
             setup();
+        }
+        if (overlay === undefined || counter === undefined) {
+            console.error("Failed to initialize StarBits overlay or counter.");
+            return;
         }
 
         if (intervalId !== null) {
@@ -40,38 +85,59 @@ export function createStarBits(options: StarBitsOptions = {}) {
         }
 
         intervalId = window.setInterval(() => {
-            if (overlay.children.length >= maxOnScreen) {
+            //overlay is guarenteed to be defined here, compiler not smart enough
+            if (overlay!.children.length >= maxOnScreen) {
                 return;
             }
 
             spawnStarBit();
         }, spawnEveryMs);
     }
-
-    function stop() {
+    /**
+     * stops the spawing of starbits, but can be restarted with start()
+     */
+    function stop(): void {
         if (intervalId !== null) {
             clearInterval(intervalId);
             intervalId = null;
         }
     }
-
-    function destroy() {
+    /**
+     * completely removes overlay and counter elements, this is for memory! So only use for cleaning up.
+     */
+    function destroy(): void {
         stop();
         overlay?.remove();
         counter?.remove();
+        overlay = undefined;
+        counter = undefined;
     }
 
-    function getTotal() {
+    /**
+     * Returns the total number of collected star bits.
+     */
+    function getTotal(): number {
         return total;
     }
 
-    function setTotal(value: number) {
+    function setTotal(value: number): void {
+        if (counter === undefined) {
+            console.error("Counter element is not defined. Cannot set total.");
+            return;
+        }
         total = value;
         localStorage.setItem(storageKey, String(total));
         counter.textContent = `✦ ${total}`;
     }
 
-    function spawnStarBit() {
+    /**
+     * Spawns a new star bit at a random safe position. This will be called on regular intervals.
+     */
+    function spawnStarBit(): void {
+        if (!overlay) {
+            console.error("Overlay element is not defined. Cannot spawn star bit.");
+            return;
+        }
         const textRects = getTextRects();
         const position = findSafePosition(textRects);
 
@@ -95,8 +161,12 @@ export function createStarBits(options: StarBitsOptions = {}) {
 
         overlay.appendChild(star);
     }
-
-    function findSafePosition(textRects: DOMRect[]) {
+    /**
+     * Finds a safe position for a new star bit that doesn't overlap with existing text.
+     * @param textRects @type {DOMRect[]} an array of DOMRect objects representing the bounding boxes of text elements on the page
+     * @returns @type({ x: number; y: number } | null)  if null no safe position was found
+     */
+    function findSafePosition(textRects: DOMRect[]): StarPosition | null {
         const padding = 20;
         const maxAttempts = 50;
 
@@ -113,10 +183,18 @@ export function createStarBits(options: StarBitsOptions = {}) {
 
         return null;
     }
-
-    function collectStarBit(star: HTMLElement) {
-        const starRect = star.getBoundingClientRect();
-        const counterRect = counter.getBoundingClientRect();
+    /**
+     * This function handles the collection of a single star bit. It animates, adds sound effect, updates the total count, and removes the star bit from the DOM.
+     * @param star @type(HTMLElement) The star that will be collected
+     * @returns 
+     */
+    function collectStarBit(star: HTMLElement): void {
+        if (counter === undefined) {
+            console.error("Counter element is not defined. Cannot collect star bit.");
+            return;
+        }
+        const starRect: DOMRect = star.getBoundingClientRect();
+        const counterRect: DOMRect = counter.getBoundingClientRect();
 
         const dx =
             counterRect.left +
@@ -138,7 +216,13 @@ export function createStarBits(options: StarBitsOptions = {}) {
         }, 500);
     }
 
-    function randomBetween(min: number, max: number) {
+    /**
+     * Generates a random number between the specified minimum and maximum values.
+     * @param min The minimum value (inclusive).
+     * @param max The maximum value (exclusive).
+     * @returns A random number between min and max.
+     */
+    function randomBetween(min: number, max: number): number {
         return Math.random() * (max - min) + min;
     }
 
@@ -148,15 +232,23 @@ export function createStarBits(options: StarBitsOptions = {}) {
         destroy,
         getTotal,
         setTotal,
-    };
+    } satisfies StarBitsApi;
 }
 
+/**
+ * Checks if a position overlaps with any text rectangle.
+ * @param x The x-coordinate of the position to check.
+ * @param y The y-coordinate of the position to check.
+ * @param size The size of the area to check.
+ * @param textRects An array of DOMRect objects representing the bounding boxes of text elements on the page.
+ * @returns A boolean indicating whether the position overlaps with any text rectangle.
+ */
 function overlapsAnyTextRect(
     x: number,
     y: number,
     size: number,
     textRects: DOMRect[]
-) {
+): boolean {
     const margin = 6;
 
     const starRect = {
@@ -176,6 +268,10 @@ function overlapsAnyTextRect(
     });
 }
 
+/**
+ * Gets the bounding rectangles of all text nodes on the page.
+ * @returns An array of DOMRect objects representing the bounding boxes of text elements on the page.
+ */
 function getTextRects(): DOMRect[] {
     const rects: DOMRect[] = [];
 
@@ -183,7 +279,7 @@ function getTextRects(): DOMRect[] {
         document.body,
         NodeFilter.SHOW_TEXT,
         {
-            acceptNode(node) {
+            acceptNode(node: Node) {
                 if (!node.textContent?.trim()) {
                     return NodeFilter.FILTER_REJECT;
                 }
@@ -233,6 +329,9 @@ function getTextRects(): DOMRect[] {
     return rects;
 }
 
+/**
+ * Injects the necessary styles for the star bits into the document.
+ */
 function injectStyles() {
     if (document.getElementById("starbits-styles")) {
         return;

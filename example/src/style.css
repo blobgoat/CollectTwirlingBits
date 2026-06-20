@@ -1,0 +1,239 @@
+/* ─────────────────────────────────────────────────────────
+   Base reset & typography
+   ───────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #0f0f13;
+  --color-surface: #1a1a24;
+  --color-border: #2e2e42;
+  --color-text: #d4d4e0;
+  --color-muted: #7a7a99;
+  --color-accent: #ffd700;
+  --color-accent-dim: rgba(255, 215, 0, 0.15);
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-mono: "Fira Code", "Cascadia Code", monospace;
+  --radius: 10px;
+  --section-gap: 80px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  font-size: 1rem;
+  padding-bottom: 120px; /* room for the fixed counter */
+}
+
+h1, h2, h3 {
+  line-height: 1.2;
+  color: #fff;
+}
+
+h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); margin-bottom: 1rem; }
+h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+
+p { margin-bottom: 1rem; }
+p:last-child { margin-bottom: 0; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Debug control panel (fixed top bar)
+   ───────────────────────────────────────────────────────── */
+.debug-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000001; /* above starbit overlay */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(10, 10, 16, 0.92);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(8px);
+  flex-wrap: wrap;
+}
+
+.debug-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.debug-panel button {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.debug-panel button:hover {
+  background: var(--color-accent-dim);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ─────────────────────────────────────────────────────────
+   Page sections
+   ───────────────────────────────────────────────────────── */
+.section {
+  max-width: 860px;
+  margin: var(--section-gap) auto 0;
+  padding: 0 24px;
+}
+
+/* Section label chip */
+.section-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-bottom: 16px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Hero section
+   ───────────────────────────────────────────────────────── */
+.hero {
+  margin-top: calc(var(--section-gap) + 48px); /* offset for fixed debug bar */
+  text-align: center;
+}
+
+.hero h1 {
+  margin: 0.25em 0 0.5em;
+}
+
+.hero-lead {
+  max-width: 600px;
+  margin: 0 auto;
+  color: var(--color-muted);
+  font-size: 1.05rem;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Card grid
+   ───────────────────────────────────────────────────────── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.card h3 {
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.card p {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Dense paragraph section
+   ───────────────────────────────────────────────────────── */
+.dense {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 32px;
+  max-width: 860px;
+}
+
+.dense p {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  text-align: justify;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Open space section
+   ───────────────────────────────────────────────────────── */
+.open-space {
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius);
+  gap: 12px;
+}
+
+.open-space-tag {
+  margin-bottom: 0;
+}
+
+.open-space-hint {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Scroll test section
+   ───────────────────────────────────────────────────────── */
+.scroll-filler {
+  display: flex;
+  flex-direction: column;
+  gap: 200px;
+  margin-top: 40px;
+  padding: 24px;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-muted);
+}
+
+/* ─────────────────────────────────────────────────────────
+   Footer
+   ───────────────────────────────────────────────────────── */
+footer {
+  margin-top: var(--section-gap);
+  padding: 24px;
+  text-align: center;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
