@@ -9,7 +9,7 @@ import { createStarBits } from "collect-twirling-bits";
 //   storageKey    – localStorage key used to persist the collected total
 // ─────────────────────────────────────────────────────────────────────────────
 const twirlingBits = createStarBits({
-  spawnEveryMs: 1000,
+  spawnEveryMs: 10000,
   maxOnScreen: 10,
   starSize: 28,
   storageKey: "twirling-bits-total",
