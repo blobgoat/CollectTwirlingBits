@@ -9,7 +9,7 @@ export default defineConfig({
   // the parent src/ are reflected immediately without rebuilding.
   resolve: {
     alias: {
-      "collect-twirling-bits": resolve(__dirname, "../src/index.ts"),
+      "CollectTwirlingBits": resolve(__dirname, "../src/index.ts"),
     },
   },
 });
