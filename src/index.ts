@@ -40,7 +40,7 @@ type StarBitsApi = {
     setTotal: (value: number) => void;
 };
 
-export function createStarBits(options: StarBitsOptions = {}) {
+export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
     const spawnEveryMs = options.spawnEveryMs ?? 1500;
     const maxOnScreen = options.maxOnScreen ?? 8;
     const starSize = options.starSize ?? 28;
@@ -275,7 +275,7 @@ function overlapsAnyTextRect(
 function getTextRects(): DOMRect[] {
     const rects: DOMRect[] = [];
 
-    const walker = document.createTreeWalker(
+    const walker: TreeWalker = document.createTreeWalker(
         document.body,
         NodeFilter.SHOW_TEXT,
         {
@@ -393,6 +393,18 @@ function injectStyles() {
       to {
         translate: 0 -6px;
       }
+    }
+      .starbit-spin {
+        animation: starbit-spin 900ms linear infinite;
+    }
+    @keyframes starbit-spin {
+        from {
+            transform: rotateZ(0deg);
+        }
+
+        to {
+            transform: rotateZ(360deg);
+        }
     }
   `;
 
