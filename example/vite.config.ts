@@ -5,11 +5,13 @@ import { resolve, dirname } from "path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  base: "/CollectTwirlingBits/",
+
   // Resolve the local package source directly so changes to
   // the parent src/ are reflected immediately without rebuilding.
   resolve: {
     alias: {
-      "CollectTwirlingBits": resolve(__dirname, "../src/index.ts"),
+      "collect-twirling-bits": resolve(__dirname, "../src/index.ts"),
     },
   },
 });
