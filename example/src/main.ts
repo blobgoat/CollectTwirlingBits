@@ -1,4 +1,5 @@
 import { createStarBits } from "collect-twirling-bits";
+import type { StarBitsApi } from "collect-twirling-bits";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Initialize the package with debug-friendly options.
@@ -8,11 +9,12 @@ import { createStarBits } from "collect-twirling-bits";
 //   starSize      – width & height of each star in pixels
 //   storageKey    – localStorage key used to persist the collected total
 // ─────────────────────────────────────────────────────────────────────────────
-const twirlingBits = createStarBits({
-  spawnEveryMs: 10000,
+const twirlingBits: StarBitsApi = createStarBits({
+  spawnEveryMs: 5000,
   maxOnScreen: 10,
   starSize: 28,
   storageKey: "twirling-bits-total",
+  speedOfSpin: 5000
 });
 
 // Start spawning immediately when the page loads.

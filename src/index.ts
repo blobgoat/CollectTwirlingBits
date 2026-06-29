@@ -6,11 +6,12 @@ import { twirlingBitsStyle } from "./twirlingbit";
  * @property {number} [maxOnScreen=8] - The maximum number of star bits that can be on screen at once.
  * @property {number} [starSize=28] - The size of each star bit in pixels.
  */
-type StarBitsOptions = {
+export type StarBitsOptions = {
     spawnEveryMs?: number;
     maxOnScreen?: number;
     starSize?: number;
     storageKey?: string;
+    speedOfSpin?: number;
 };
 
 /**
@@ -19,7 +20,7 @@ type StarBitsOptions = {
  * @property {number} x - The x-coordinate of the star bit.
  * @property {number} y - The y-coordinate of the star bit.
  */
-type StarPosition = {
+export type StarPosition = {
     x: number;
     y: number;
 };
@@ -33,7 +34,7 @@ type StarPosition = {
  * @property {Function} getTotal - Gets the total number of collected star bits.
  * @property {Function} setTotal - Sets the total number of collected star bits.
  */
-type StarBitsApi = {
+export type StarBitsApi = {
     start: () => void;
     stop: () => void;
     destroy: () => void;
@@ -46,6 +47,7 @@ export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
     const maxOnScreen = options.maxOnScreen ?? 8;
     const starSize = options.starSize ?? 28;
     const storageKey = options.storageKey ?? "starbits-total";
+    const speedOfSpin = options.speedOfSpin ?? 2000;
 
     let intervalId: number | null = null;
     let total = Number(localStorage.getItem(storageKey) ?? "0");
@@ -67,6 +69,8 @@ export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
         document.body.appendChild(counter);
 
         injectStyles();
+        //want one to spawn immediately
+        spawnStarBit();
     }
     /**
      * starts the spawning at a set interval, if overlay isnt setup yet it will attemt to setup first
@@ -154,6 +158,7 @@ export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
         const starIcon: HTMLSpanElement = document.createElement("span");
         starIcon.className = "starbit-spin";
         starIcon.textContent = "✦";
+        starIcon.style.setProperty("--speed", `${speedOfSpin}ms`);
 
         star.appendChild(starIcon);
 
@@ -174,21 +179,100 @@ export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
      * @returns @type({ x: number; y: number } | null)  if null no safe position was found
      */
     function findSafePosition(textRects: DOMRect[]): StarPosition | null {
-        const padding = 20;
-        const maxAttempts = 50;
+        const padding: number = 20;
+        const maxAttempts: number = 80;
+
+        let bestPosition: StarPosition | null = null;
+        let bestScore: number = -Infinity;
 
         for (let i = 0; i < maxAttempts; i++) {
-            const x = randomBetween(padding, window.innerWidth - starSize - padding);
-            const y = randomBetween(padding, window.innerHeight - starSize - padding);
+            const x: number = randomBetween(padding, window.innerWidth - starSize - padding);
+            const y: number = randomBetween(padding, window.innerHeight - starSize - padding);
 
-            const overlapsText = overlapsAnyTextRect(x, y, starSize, textRects);
+            const overlapsText: boolean = overlapsAnyTextRect(x, y, starSize, textRects);
 
-            if (!overlapsText) {
-                return { x, y };
+            if (overlapsText) {
+                continue;
+            }
+
+            const score: number = distanceFromNearestObstacle(x, y);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestPosition = { x, y };
             }
         }
 
-        return null;
+        return bestPosition;
+    }
+    /**
+     * Calculates the distance from a position to the nearest obstacle, which includes screen edges and existing stars
+     * @param x x-coordinate of a star
+     * @param y y-coordinate of a star
+     * @returns The distance from the position to the nearest obstacle
+     */
+    function distanceFromNearestObstacle(x: number, y: number): number {
+        const distanceToScreenEdge: number = distanceFromNearestScreenEdge(x, y);
+        const distanceToStarBit: number = distanceFromNearestStarBit(x, y);
+        return Math.min(distanceToScreenEdge, distanceToStarBit);
+    }
+
+    /**
+     * Calculates the distance from a position to the nearest screen edge.
+     * @param x x-coordinate of star
+     * @param y y-coordinate of star
+     * @returns number The distance from the position to the nearest screen edge
+     */
+    function distanceFromNearestScreenEdge(x: number, y: number): number {
+        const leftDistance: number = x;
+        const rightDistance: number = window.innerWidth - (x + starSize);
+        const topDistance: number = y;
+        const bottomDistance: number = window.innerHeight - (y + starSize);
+        return Math.min(leftDistance, rightDistance, topDistance, bottomDistance);
+    }
+
+    /**
+     * Calculates the distance from a position to the nearest existing star bit.
+     * @param x x-coordinate of a star
+     * @param y y-coordinate of a star
+     * @returns the distance from the position to the nearest star or infinity if no overlay exists
+     */
+    function distanceFromNearestStarBit(x: number, y: number): number {
+        if (!overlay) {
+            console.log("Overlay is not defined. Returning Infinity for distance to nearest star bit.");
+            return Infinity;
+        }
+
+        const existingStars = Array.from(
+            overlay.querySelectorAll<HTMLButtonElement>(".starbit")
+        );
+
+        if (existingStars.length === 0) {
+            return Infinity;
+        }
+
+        const candidateCenterX: number = x + starSize / 2;
+        const candidateCenterY: number = y + starSize / 2;
+
+        let nearestDistance: number = Infinity;
+
+        for (const star of existingStars) {
+            const rect = star.getBoundingClientRect();
+
+            const starCenterX: number = rect.left + rect.width / 2;
+            const starCenterY: number = rect.top + rect.height / 2;
+
+            const dx: number = candidateCenterX - starCenterX;
+            const dy: number = candidateCenterY - starCenterY;
+
+            const distance: number = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+            }
+        }
+
+        return nearestDistance;
     }
     /**
      * This function handles the collection of a single star bit. It animates, adds sound effect, updates the total count, and removes the star bit from the DOM.
@@ -203,12 +287,12 @@ export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
         const starRect: DOMRect = star.getBoundingClientRect();
         const counterRect: DOMRect = counter.getBoundingClientRect();
 
-        const dx =
+        const dx: number =
             counterRect.left +
             counterRect.width / 2 -
             (starRect.left + starRect.width / 2);
 
-        const dy =
+        const dy: number =
             counterRect.top +
             counterRect.height / 2 -
             (starRect.top + starRect.height / 2);
@@ -346,7 +430,10 @@ function injectStyles() {
 
     const style = document.createElement("style");
     style.id = "starbits-styles";
+
+
     style.textContent = twirlingBitsStyle;
+
 
     document.head.appendChild(style);
 }

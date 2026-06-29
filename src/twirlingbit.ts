@@ -43,7 +43,7 @@ export const twirlingBitsStyle = `
         font-size: 20px;
         pointer-events: none;
     }
-        
+
     @media (min-width: 768px) {
         .starbits-counter {
             left: 24px;
@@ -63,7 +63,7 @@ export const twirlingBitsStyle = `
     }
 
     .starbit-spin {
-        animation: starbit-spin 2000ms linear infinite;
+        animation: starbit-spin var(--speed, 1000ms) linear infinite;
     }
 
     @keyframes starbit-spin {
