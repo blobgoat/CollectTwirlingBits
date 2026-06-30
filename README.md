@@ -88,6 +88,7 @@ type StarBitsOptions = {
   maxOnScreen?: number;
   starSize?: number;
   storageKey?: string;
+  speedOfSpin?: string;
 };
 ```
 
@@ -97,6 +98,8 @@ type StarBitsOptions = {
 | `maxOnScreen`  | `number` | `8`                     | Maximum number of twirling bits allowed on screen at once. |
 | `starSize`     | `number` | `28`                    | Size of each twirling bit in pixels.                       |
 | `storageKey`   | `string` | `"twirling-bits-total"` | The `localStorage` key used to save the collected total.   |
+| `speedOfSpin`  | `number` | `2000` | The ms required to do a full rotation of a twirling bit (raise the value to speed it up or slow it down)
+| `spawnOverImages` | `boolean` | `false` | when determining where the stars should spawn, it will avoid images and image like objects (currently supports svg, images, canvas and videos).
 
 ### Methods
 
@@ -140,19 +143,19 @@ Sets the collected total and saves it to `localStorage`.
 starBits.setTotal(0);
 ```
 
-## How Text Avoidance Works
+## How Text (and Image) Avoidance Works
 
 Collect Twirling Bits uses the browser DOM to find visible text nodes on the page.
 
-It walks through text nodes with `TreeWalker`, measures their visible line boxes using `Range.getClientRects()`, and rejects spawn positions that overlap those rectangles.
+It walks through text nodes with `TreeWalker`, measures their visible line boxes (and other elements) using `Range.getClientRects()`, and rejects spawn positions that overlap those rectangles.
 
-This means twirling bits should avoid spawning directly on top of actual rendered text, even when paragraphs wrap across multiple lines.
+Note: it doesn't seem possible to parrellize this task due to it being on the DOM and web workers are unable to do the DOM reading part.
+
+This means twirling bits should avoid spawning directly on top of actual rendered text(or image like objects), even when paragraphs wrap across multiple lines.
 
 ## Example Folder
 
 This repository includes an `example/` folder for local testing and debugging.
-
-Suggested structure:
 
 ```txt
 collect-twirling-bits/
@@ -229,7 +232,8 @@ Common package scripts:
 {
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "dev": "tsup src/index.ts --format esm,cjs --dts --watch"
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "test": "vitest run"
   }
 }
 ```
@@ -248,7 +252,8 @@ This package is intended to be:
 
 Possible future improvements:
 
-* Custom twirling bit graphics
+* Custom Images/pngs for the Particle
+* Custom Animations the User Can Add
 * Sound effects
 * Particle trail on collection
 * Click or touch collection mode
@@ -256,7 +261,6 @@ Possible future improvements:
 * Custom spawn area
 * MutationObserver support for dynamic pages
 * React wrapper
-* Better mobile support
 * Accessibility options
 * Configurable twirling bit rendering
 
