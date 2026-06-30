@@ -15,6 +15,28 @@ Twirling bits appear in random safe positions on the screen, avoid overlapping v
 * Stores the total on the client with `localStorage`
 * Configurable spawn rate, max count, size, and storage key
 
+## Demo
+
+
+### Collecting Twirling Bits
+
+Hovering over a twirling bit collects it and animates it toward the counter.
+
+<img src="./assets/CollectingBits.gif" alt="Twirling bit being collected and flying toward the counter" width="700" />
+
+### Spawning Twirling Bits
+
+Twirling bits spawn in random safe positions on the page while avoiding visible text and image-like elements.
+
+<img src="./assets/WindowFullOfBits.gif" alt="Twirling bits spawning around the page" width="700" />
+
+### Mobile Layout
+
+On smaller screens, the counter adjusts for a phone-friendly layout.
+
+<img src="./assets/PhoneScreen.gif" alt="Collect Twirling Bits phone layout demo" width="320" />
+
+
 ## Installation
 
 ```bash
@@ -98,7 +120,7 @@ type StarBitsOptions = {
 | `maxOnScreen`  | `number` | `8`                     | Maximum number of twirling bits allowed on screen at once. |
 | `starSize`     | `number` | `28`                    | Size of each twirling bit in pixels.                       |
 | `storageKey`   | `string` | `"twirling-bits-total"` | The `localStorage` key used to save the collected total.   |
-| `speedOfSpin`  | `number` | `2000` | The ms required to do a full rotation of a twirling bit (raise the value to speed it up or slow it down)
+| `speedOfSpin`  | `number` | `2000` | The time in milliseconds required to complete one full rotation. Lower values spin faster; higher values spin slower.
 | `spawnOverImages` | `boolean` | `false` | when determining where the stars should spawn, it will avoid images and image like objects (currently supports svg, images, canvas and videos).
 
 ### Methods
