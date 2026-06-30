@@ -327,16 +327,6 @@ export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
         }, 500);
     }
 
-    /**
-     * Generates a random number between the specified minimum and maximum values.
-     * @param min The minimum value (inclusive).
-     * @param max The maximum value (exclusive).
-     * @returns A random number between min and max.
-     */
-    function randomBetween(min: number, max: number): number {
-        return Math.random() * (max - min) + min;
-    }
-
     return {
         start,
         stop,
