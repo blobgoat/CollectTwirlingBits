@@ -182,30 +182,48 @@ export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
      */
     function findSafePosition(textRects: DOMRect[]): StarPosition | null {
         const padding: number = 20;
-        const maxAttempts: number = 80;
+        const step: number = Math.max(8, starSize / 2);
 
-        let bestPosition: StarPosition | null = null;
-        let bestScore: number = -Infinity;
+        const candidates: { position: StarPosition; score: number }[] = [];
 
-        for (let i = 0; i < maxAttempts; i++) {
-            const x: number = randomBetween(padding, window.innerWidth - starSize - padding);
-            const y: number = randomBetween(padding, window.innerHeight - starSize - padding);
+        const minX = padding;
+        const maxX = window.innerWidth - starSize - padding;
+        const minY = padding;
+        const maxY = window.innerHeight - starSize - padding;
 
-            const overlapsText: boolean = overlapsAnyTextRect(x, y, starSize, textRects);
+        for (let x = minX; x <= maxX; x += step) {
+            for (let y = minY; y <= maxY; y += step) {
+                if (overlapsAnyTextRect(x, y, starSize, textRects)) {
+                    continue;
+                }
 
-            if (overlapsText) {
-                continue;
-            }
-
-            const score: number = distanceFromNearestObstacle(x, y);
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestPosition = { x, y };
+                const score = distanceFromNearestObstacle(x, y);
+                candidates.push({
+                    position: { x, y },
+                    score,
+                });
             }
         }
 
-        return bestPosition;
+        if (candidates.length === 0) {
+            return null;
+        }
+
+        const totalWeight = candidates.reduce((sum, candidate) => {
+            return sum + candidate.score;
+        }, 0);
+
+        let random: number = Math.random() * totalWeight;
+
+        for (const candidate of candidates) {
+            random -= candidate.score;
+
+            if (random <= 0) {
+                return candidate.position;
+            }
+        }
+
+        return candidates[candidates.length - 1].position;
     }
     /**
      * Calculates the distance from a position to the nearest obstacle, which includes screen edges and existing stars
