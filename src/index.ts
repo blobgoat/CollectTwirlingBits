@@ -12,6 +12,7 @@ export type StarBitsOptions = {
     starSize?: number;
     storageKey?: string;
     speedOfSpin?: number;
+    spawnOverImages?: boolean;
 };
 
 /**
@@ -43,11 +44,12 @@ export type StarBitsApi = {
 };
 
 export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
-    const spawnEveryMs = options.spawnEveryMs ?? 1500;
-    const maxOnScreen = options.maxOnScreen ?? 8;
-    const starSize = options.starSize ?? 28;
-    const storageKey = options.storageKey ?? "starbits-total";
-    const speedOfSpin = options.speedOfSpin ?? 2000;
+    const spawnEveryMs: number = options.spawnEveryMs ?? 1500;
+    const maxOnScreen: number = options.maxOnScreen ?? 8;
+    const starSize: number = options.starSize ?? 28;
+    const storageKey: string = options.storageKey ?? "starbits-total";
+    const speedOfSpin: number = options.speedOfSpin ?? 2000;
+    const spawnOverImages: boolean = options.spawnOverImages ?? false;
 
     let intervalId: number | null = null;
     let total = Number(localStorage.getItem(storageKey) ?? "0");
@@ -144,8 +146,8 @@ export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
             return;
         }
 
-        const textRects = getTextRects();
-        const position = findSafePosition(textRects);
+        const textRects: DOMRect[] = getTextRects(spawnOverImages);
+        const position: StarPosition | null = findSafePosition(textRects);
 
         if (!position) {
             return;
@@ -361,10 +363,65 @@ function overlapsAnyTextRect(
 
 /**
  * Gets the bounding rectangles of all text nodes on the page.
+ * @param includeImages A boolean indicating whether to include images in the returned rectangles. Defaults to false.
  * @returns An array of DOMRect objects representing the bounding boxes of text elements on the page.
  */
-function getTextRects(): DOMRect[] {
+function getTextRects(includeImages: boolean = false): DOMRect[] {
     const rects: DOMRect[] = [];
+
+    /**
+     * Determines if an element should be ignored when calculating text rectangles.
+     * @param element The element to check.
+     * @returns A boolean indicating whether the element should be ignored.
+     */
+    function isIgnoredElement(element: Element): boolean {
+        if (
+            element.closest(".starbits-overlay") ||
+            element.closest(".starbits-counter")
+        ) {
+            return true;
+        }
+
+        let current: Element | null = element;
+
+        while (current) {
+            const style = window.getComputedStyle(current);
+
+            if (
+                style.display === "none" ||
+                style.visibility === "hidden" ||
+                Number(style.opacity) === 0
+            ) {
+                return true;
+            }
+
+            current = current.parentElement;
+        }
+
+        return false;
+    }
+
+    /**
+     * Adds a DOMRect to the list of rectangles if it meets certain criteria.
+     * @param rect The DOMRect to add.
+     */
+    function addRect(rect: DOMRect): void {
+        if (rect.width <= 0 || rect.height <= 0) {
+            return;
+        }
+
+        // Optional: ignore things outside the viewport
+        if (
+            rect.right < 0 ||
+            rect.bottom < 0 ||
+            rect.left > window.innerWidth ||
+            rect.top > window.innerHeight
+        ) {
+            return;
+        }
+
+        rects.push(rect);
+    }
 
     const walker: TreeWalker = document.createTreeWalker(
         document.body,
@@ -380,20 +437,7 @@ function getTextRects(): DOMRect[] {
                     return NodeFilter.FILTER_REJECT;
                 }
 
-                if (
-                    parent.closest(".starbits-overlay") ||
-                    parent.closest(".starbits-counter")
-                ) {
-                    return NodeFilter.FILTER_REJECT;
-                }
-
-                const style = window.getComputedStyle(parent);
-
-                if (
-                    style.display === "none" ||
-                    style.visibility === "hidden" ||
-                    Number(style.opacity) === 0
-                ) {
+                if (isIgnoredElement(parent)) {
                     return NodeFilter.FILTER_REJECT;
                 }
 
@@ -409,12 +453,22 @@ function getTextRects(): DOMRect[] {
         range.selectNodeContents(node);
 
         for (const rect of Array.from(range.getClientRects())) {
-            if (rect.width > 0 && rect.height > 0) {
-                rects.push(rect);
-            }
+            addRect(rect);
         }
 
         range.detach();
+    }
+
+    if (includeImages) {
+        const imageElements: NodeListOf<Element> = document.querySelectorAll("img, svg, canvas, video");
+
+        for (const element of Array.from(imageElements)) {
+            if (isIgnoredElement(element)) {
+                continue;
+            }
+
+            addRect(element.getBoundingClientRect());
+        }
     }
 
     return rects;
