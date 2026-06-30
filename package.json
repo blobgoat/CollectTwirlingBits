@@ -16,7 +16,17 @@
         "vite": "^6.4.3",
         "vitest": "^4.1.9"
     },
-    "dependencies": {
-        "ci": "^2.3.0"
-    }
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        }
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "dependencies": {}
 }
