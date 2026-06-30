@@ -18,24 +18,31 @@ Twirling bits appear in random safe positions on the screen, avoid overlapping v
 ## Demo
 
 
-### Collecting Twirling Bits
-
-Hovering over a twirling bit collects it and animates it toward the counter.
-
-<img src="./assets/CollectingBits.gif" alt="Twirling bit being collected and flying toward the counter" width="700" />
+## Demo
 
 ### Spawning Twirling Bits
 
-Twirling bits spawn in random safe positions on the page while avoiding visible text and image-like elements.
+<img
+  src="https://raw.githubusercontent.com/blobgoat/CollectTwirlingBits/main/assets/CollectingBits.gif"
+  alt="Twirling bits spawning around the page"
+  width="700"
+/>
 
-<img src="./assets/WindowFullOfBits.gif" alt="Twirling bits spawning around the page" width="700" />
+### Collecting Twirling Bits
+
+<img
+  src="https://raw.githubusercontent.com/blobgoat/CollectTwirlingBits/main/assets/WindowFullOfBits.gif"
+  alt="Twirling bit being collected and flying toward the counter"
+  width="700"
+/>
 
 ### Mobile Layout
 
-On smaller screens, the counter adjusts for a phone-friendly layout.
-
-<img src="./assets/PhoneScreen.gif" alt="Collect Twirling Bits phone layout demo" width="320" />
-
+<img
+  src="https://raw.githubusercontent.com/blobgoat/CollectTwirlingBits/main/assets/PhoneScreen.gif"
+  alt="Collect Twirling Bits phone layout demo"
+  width="320"
+/>
 
 ## Installation
 
