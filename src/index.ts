@@ -145,8 +145,8 @@ export function createStarBits(options: StarBitsOptions = {}): StarBitsApi {
             console.error("Overlay element is not defined. Cannot spawn star bit.");
             return;
         }
-
-        const textRects: DOMRect[] = getTextRects(spawnOverImages);
+        //spawnover images needs to be not because the param means include params
+        const textRects: DOMRect[] = getTextRects(!spawnOverImages);
         const position: StarPosition | null = findSafePosition(textRects);
 
         if (!position) {
